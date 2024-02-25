@@ -10,29 +10,29 @@ OBJFILES = \
 
 image:
 	@echo "Creating hdd.img..."
-	@dd if=/dev/zero of=./hdd.img bs=512 count=16065 1>/dev/null 2>&1
+	dd if=/dev/zero of=./hdd.img bs=512 count=16065 1>/dev/null 2>&1
 
 	@echo "Creating bootable first FAT32 partition..."
-	@losetup /dev/loop7 ./hdd.img
-	@(echo c; echo u; echo n; echo p; echo 1; echo ; echo ; echo a; echo t; echo c; echo w;) | fdisk /dev/loop7 1>/dev/null 2>&1 || true
+	losetup /dev/loop7 ./hdd.img
+	(echo c; echo u; echo n; echo p; echo 1; echo ; echo ; echo a; echo t; echo c; echo w;) | fdisk /dev/loop7 1>/dev/null 2>&1 || true
 
 	@echo "Mounting partition to /dev/loop9..."
-	@losetup /dev/loop9 ./hdd.img --offset `echo \`fdisk -lu /dev/loop7 | sed -n 9p | awk '{print $$3}'\`*512 | bc` --sizelimit `echo \`fdisk -lu /dev/loop7 | sed -n 9p | awk '{print $$4}'\`*512 | bc`
-	@losetup -d /dev/loop7
+	losetup /dev/loop9 ./hdd.img --offset `echo \`fdisk -lu /dev/loop7 | sed -n 9p | awk '{print $$3}'\`*512 | bc` --sizelimit `echo \`fdisk -lu /dev/loop7 | sed -n 9p | awk '{print $$4}'\`*512 | bc`
+	losetup -d /dev/loop7
 
 	@echo "Format partition..."
-	@mkdosfs /dev/loop9
+	mkdosfs /dev/loop9
 
 	@echo "Copy kernel and grub files on partition..."
-	@mkdir -p tempdir
-	@mount /dev/loop9 tempdir
-	@mkdir tempdir/boot
-	@cp -r grub tempdir/boot/
-	@cp kernel.bin tempdir/
-	@sleep 1
-	@umount /dev/loop9
-	@rm -r tempdir
-	@losetup -d /dev/loop9
+	mkdir -p tempdir
+	mount /dev/loop9 tempdir
+	mkdir tempdir/boot
+	cp -r grub tempdir/boot/
+	cp kernel.bin tempdir/
+	sleep 1
+	umount /dev/loop9
+	rm -r tempdir
+	losetup -d /dev/loop9
 
 	@echo "Installing GRUB..."
 	@echo "device (hd0) hdd.img \n \
