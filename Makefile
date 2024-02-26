@@ -69,4 +69,9 @@ clean:
 	-sudo losetup -d /dev/loop9
 	sudo rm -f $(OBJFILES) hdd.img kernel.bin
 run:
-	qemu-system-i386 -hda hdd.img
+	qemu-system-i386 -no-reboot -no-shutdown -drive format=raw,file=hdd.img
+
+
+
+
+
