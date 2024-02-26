@@ -75,11 +75,11 @@ int VBE_Setup(int w, int h) {
 
   // Try to find  mode
   int found = 0;
-  for (m = 0x0; m < 0x800; m++) {
+  for (m = 0x0; m < 0x1000; m++) {
     ModeInfoBlock *p_m_info = VBE_GetModeInfo(m);
     if (p_m_info != NULL) {
 
-      printf("\nVBE: %dx%dx%d at %x", p_m_info->XResolution,
+      printf("\nVBE: %dx%dx%d at 0x%x", p_m_info->XResolution,
              p_m_info->YResolution, p_m_info->BitsPerPixel,
              p_m_info->PhysBasePtr);
 
@@ -90,7 +90,7 @@ int VBE_Setup(int w, int h) {
         vbe_selected_mode = m;
         vbe_lfb_addr = p_m_info->PhysBasePtr;
         vbe_bytes = p_m_info->BitsPerPixel / 8;
-        printf("\nVBE: FOUND GOOD %dx%dx%d -> %x at %x", w, h, vbe_bytes,
+        printf("\nVBE: FOUND GOOD %dx%dx%d -> 0x%x at 0x%x", w, h, vbe_bytes,
                vbe_selected_mode, vbe_lfb_addr);
         break;
       }

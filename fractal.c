@@ -57,7 +57,7 @@ int HSVtoRGB(int _h, int _s, int _v) {
 }
 
 void DrawFractal(void) {
-  int x = 0, y = 0, w = 1440, h = 900;
+  int x = 0, y = 0, w = 800, h = 600;
 
   if (!VBE_Setup(w, h)) {
     printf("\nVBE_Setup failed.");
@@ -65,7 +65,7 @@ void DrawFractal(void) {
   }
 
   if (!VBE_SetMode(vbe_selected_mode | 0x4000)) {
-    printf("\n'Selected Mode | 0x4000' does not acceptable");
+    printf("\n'0x%x | 0x4000' does not acceptable", vbe_selected_mode);
     return;
   }
 
