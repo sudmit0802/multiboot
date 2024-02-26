@@ -6,7 +6,7 @@ sudo apt-get update
 sudo aapt-get install bc
 sudo apt-get install fdisk
 ```
-For runnning i386 apps like ald grub with qemu:
+For runnning i386 apps like old grub with qemu:
 ```bash
 sudo dpkg --add-architecture i386
 sudo apt-get update
