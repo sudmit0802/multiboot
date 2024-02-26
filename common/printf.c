@@ -521,16 +521,6 @@ static int do_snputchar(int c, void *data) {
   return 0;
 }
 
-int printf(const char *format, ...) {
-  va_list ap;
-  int r;
-
-  va_start(ap, format);
-  r = vprintf(format, ap);
-  va_end(ap);
-  return r;
-}
-
 int vprintf(const char *format, va_list ap) {
   int r;
 
@@ -539,12 +529,12 @@ int vprintf(const char *format, va_list ap) {
   return r;
 }
 
-int snprintf(char *str, size_t size, const char *format, ...) {
+int printf(const char *format, ...) {
   va_list ap;
   int r;
 
   va_start(ap, format);
-  r = vsnprintf(str, size, format, ap);
+  r = vprintf(format, ap);
   va_end(ap);
   return r;
 }
@@ -557,5 +547,15 @@ int vsnprintf(char *str, size_t size, const char *format, va_list ap) {
   data.len = size;
   r = do_printf(format, ap, do_snputchar, &data);
   do_snputchar('\0', &data);
+  return r;
+}
+
+int snprintf(char *str, size_t size, const char *format, ...) {
+  va_list ap;
+  int r;
+
+  va_start(ap, format);
+  r = vsnprintf(str, size, format, ap);
+  va_end(ap);
   return r;
 }

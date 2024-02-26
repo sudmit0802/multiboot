@@ -2,7 +2,13 @@
 #include "screen.h"
 #include "types.h"
 
-void main(void) {
-  clear_screen();
-  printf("\n>>> Hello World!\n");
+void DrawFractal(void);
+
+int main()
+{   
+    clear_screen();
+    printf("\nHello World!");
+    clear_screen();
+    DrawFractal();
+    return 0;
 }
