@@ -30,5 +30,3 @@ For run with qemu:
 ```bash
 sudo make run
 ```
-
-Sudo could not be necessary, but it is because of losetup and fdisk actions that needs root privilegies
