@@ -26,7 +26,7 @@ For rebuild:
 ```bash
 sudo make rebuild
 ```
-For run qmu:
+For run with qemu:
 ```bash
 sudo make run
 ```
