@@ -9,6 +9,7 @@
 #define VBE_BIOS_INFO_OFFSET 0x70000
 #define VBE_BIOS_MODE_INFO_OFFSET 0x80000
 
+#include "types.h"
 typedef struct _BIOS_REGS {
   u16 CS;
   u16 DS;

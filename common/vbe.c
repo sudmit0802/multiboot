@@ -13,7 +13,7 @@ VbeInfoBlock *VBE_GetGeneralInfo() {
   memset(&regs, 0, sizeof(BIOS_REGS));
   regs.ECX = 0;
   regs.EAX = 0x4f00;
-  regs.ES = (VBE_BIOS_INFO_OFFSET) >> 4;
+  regs.ES = VBE_BIOS_INFO_OFFSET >> 4;
   regs.EDI = 0x0;
   VBE_BiosInterrupt(&regs, 0x10);
   if (regs.EAX != 0x4f)
@@ -26,7 +26,7 @@ ModeInfoBlock *VBE_GetModeInfo(ulong mode) {
   memset(&regs, 0, sizeof(BIOS_REGS));
   regs.ECX = mode;
   regs.EAX = 0x4f01;
-  regs.ES = (VBE_BIOS_MODE_INFO_OFFSET) >> 4;
+  regs.ES = VBE_BIOS_MODE_INFO_OFFSET >> 4;
   regs.EDI = 0x0;
   VBE_BiosInterrupt(&regs, 0x10);
   if (regs.EAX != 0x4f)
@@ -35,7 +35,6 @@ ModeInfoBlock *VBE_GetModeInfo(ulong mode) {
 }
 
 int VBE_SetMode(ulong mode) {
-
   BIOS_REGS regs;
   memset(&regs, 0, sizeof(BIOS_REGS));
   if (mode >= 0x100) {
@@ -75,11 +74,10 @@ int VBE_Setup(int w, int h) {
 
   // Try to find  mode
   int found = 0;
-  for (m = 0x0; m < 0x1000; m++) {
+  for (m = 0x0; m < 0x200; m++) {
     ModeInfoBlock *p_m_info = VBE_GetModeInfo(m);
     if (p_m_info != NULL) {
-
-      printf("\nVBE: %dx%dx%d at 0x%x", p_m_info->XResolution,
+      printf("\nVBE: %dx%dx%d -> 0x%x at %x", m, p_m_info->XResolution,
              p_m_info->YResolution, p_m_info->BitsPerPixel,
              p_m_info->PhysBasePtr);
 
@@ -92,10 +90,8 @@ int VBE_Setup(int w, int h) {
         vbe_bytes = p_m_info->BitsPerPixel / 8;
         printf("\nVBE: FOUND GOOD %dx%dx%d -> 0x%x at 0x%x", w, h, vbe_bytes,
                vbe_selected_mode, vbe_lfb_addr);
-        break;
       }
     }
   }
-
   return found;
 }

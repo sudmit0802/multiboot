@@ -63,7 +63,6 @@ void DrawFractal(void) {
     printf("\nVBE_Setup failed.");
     return;
   }
-
   if (!VBE_SetMode(vbe_selected_mode | 0x4000)) {
     printf("\n'0x%x | 0x4000' does not acceptable", vbe_selected_mode);
     return;

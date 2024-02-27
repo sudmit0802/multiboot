@@ -69,4 +69,13 @@ clean:
 	-sudo losetup -d /dev/loop9
 	sudo rm -f $(OBJFILES) hdd.img kernel.bin
 run:
-	qemu-system-i386 -no-reboot -no-shutdown -drive format=raw,file=hdd.img
+	qemu-system-i386 \
+    -monitor stdio \
+    -vga std \
+    -machine accel=tcg \
+    -m 2G \
+    -no-reboot \
+    -no-shutdown \
+    -drive format=raw,file=hdd.img \
+    -boot once=c,menu=on \
+    -net none \
