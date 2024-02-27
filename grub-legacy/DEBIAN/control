@@ -1,0 +1,21 @@
+Package: grub-legacy
+Source: grub
+Version: 0.97-80
+Architecture: i386
+Maintainer: GRUB Maintainers <pkg-grub-devel@alioth-lists.debian.net>
+Installed-Size: 725
+Depends: grub-common, libc6 (>= 2.33), libncurses6 (>= 6), libtinfo6 (>= 6)
+Suggests: grub-legacy-doc, mdadm, multiboot
+Replaces: grub (<< 0.97-54)
+Provides: grub
+Section: admin
+Priority: optional
+Multi-Arch: foreign
+Description: GRand Unified Bootloader (Legacy version)
+ GRUB is a GPLed bootloader intended to unify bootloading across x86
+ operating systems.  In addition to loading the Linux kernel,
+ it implements the Multiboot standard, which allows for flexible loading
+ of multiple boot images (needed for modular kernels such as the GNU Hurd).
+ .
+ Please note that GRUB Legacy is in maintanance mode and new features are
+ only accepted in GRUB 2 (grub-pc package).
