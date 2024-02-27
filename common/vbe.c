@@ -74,11 +74,11 @@ int VBE_Setup(int w, int h) {
 
   // Try to find  mode
   int found = 0;
-  for (m = 0x0; m < 0x200; m++) {
+  for (m = 0x0; m < 0x500; m++) {
     ModeInfoBlock *p_m_info = VBE_GetModeInfo(m);
     if (p_m_info != NULL) {
-      printf("\nVBE: %dx%dx%d -> 0x%x at %x", m, p_m_info->XResolution,
-             p_m_info->YResolution, p_m_info->BitsPerPixel,
+      printf("\nVBE: %dx%dx%d -> 0x%x at 0x%x", p_m_info->XResolution,
+             p_m_info->YResolution, p_m_info->BitsPerPixel, m,
              p_m_info->PhysBasePtr);
 
       if (p_m_info->PhysBasePtr != 0 && p_m_info->XResolution == w &&
