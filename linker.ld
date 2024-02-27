@@ -1,12 +1,30 @@
-ENTRY (loader)
-LMA = 0x00100000;
+
+ENTRY(_start)
 SECTIONS
 {
-    . = LMA;
-    .multiboot ALIGN (0x1000) :   {  loader.o( .text ) }
-    .text      ALIGN (0x1000) :   {  *(.text)          }
-    .rodata    ALIGN (0x1000) :   {  *(.rodata*)       }
-    .data      ALIGN (0x1000) :   {  *(.data)          }
-    .bss :                        {  *(COMMON) *(.bss) }
-    /DISCARD/ :                   {  *(.comment)       }
+	. = 1M;
+	.text BLOCK(4K) : ALIGN(4K)
+	{
+		*(.multiboot)
+		*(.text)
+	}
+	.note.gnu.build-id BLOCK(4K) : ALIGN(4K)
+	{
+		*(.note.gnu.build-id)
+	}
+
+	.rodata BLOCK(4K) : ALIGN(4K)
+	{
+		*(.rodata)
+	}
+	.data BLOCK(4K) : ALIGN(4K)
+	{
+		*(.data)
+	}
+	.bss BLOCK(4K) : ALIGN(4K)
+	{
+		*(COMMON)
+		*(.bss)
+		*(.bootstrap_stack)
+	}
 }

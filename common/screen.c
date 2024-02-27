@@ -14,17 +14,7 @@ static unsigned char curr_row = 0;
   (((unsigned short *)(DEF_VRAM_BASE))[(curr_row * MAX_COL) + curr_col] =      \
        (GREEN << 8) | (c))
 
-void clear_screen(void) {
-  curr_col = 0;
-  curr_row = 0;
 
-  unsigned short *vram_ptr = (unsigned short *)DEF_VRAM_BASE;
-
-  int i;
-  for (i = 0; i < VRAM_SIZE; i++) {
-    vram_ptr[i] = (GREEN << 8) | ' ';
-  }
-}
 
 // Place a character on next screen position
 static void cons_putc(int c) {
@@ -56,10 +46,23 @@ static void cons_putc(int c) {
       curr_col = 0;
       curr_row += 1;
       if (curr_row >= MAX_ROW) {
-        clear_screen();
+        curr_row=0;
       }
     }
   };
+}
+
+void clear_screen( void )
+{
+    curr_col = 0;
+    curr_row = 0;
+    
+    int i;
+    for (i = 0; i < VRAM_SIZE; i++)
+        cons_putc(' ');
+    
+    curr_col = 0;
+    curr_row = 0;
 }
 
 void putchar(int c) {
