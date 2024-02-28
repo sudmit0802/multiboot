@@ -27,6 +27,8 @@
 // Math
 #include <kernel/libk/math.h>
 
+#include <kernel/snake.h>
+
 uint32_t kernel_stack_top_vaddr;
 
 int kernel_init(struct multiboot_info *mboot_info) {
@@ -123,33 +125,7 @@ void kernel_main(int magic_number, struct multiboot_info *mboot_info) // Argumen
   asm volatile("mov %%esp, %0" : "=r"(esp));
   tss_set_stack(0x10, esp);
 
-    int x,y;
-    int h = VESA_HEIGHT;
-    int w = VESA_WIDTH;
-    double zoom = 1, moveX = 0, moveY = 0;
-    int maxIterations = 300;
-    double cRe = -0.7;
-    double cIm = 0.27015;
-    int color;
-    double newRe, newIm, oldRe, oldIm;
-
-  for (x = 0; x < w; x++)
-    for (y = 0; y < h; y++) {
-      newRe = 1.5 * (x - w / 2) / (0.5 * zoom * w) + moveX;
-      newIm = (y - h / 2) / (0.5 * zoom * h) + moveY;
-
-      int i;
-      for (i = 0; i < maxIterations; i++) {
-        oldRe = newRe;
-        oldIm = newIm;
-        newRe = oldRe * oldRe - oldIm * oldIm + cRe;
-        newIm = 2 * oldRe * oldIm + cIm;
-        if ((newRe * newRe + newIm * newIm) > 4)
-          break;
-      }
-      color = HSVtoRGB(i % 256, 255, 255 * (i < maxIterations));
-      set_pixel(x, y, color & 0xFFFFFF);
-    }
+  draw_filled_circle(100, 100, 50, 255, 0, 0);
 
   tty_setcolor(VESA_BLACK);
   tty_update_cursor(0, 0);

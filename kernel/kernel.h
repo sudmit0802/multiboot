@@ -4,7 +4,6 @@
 //#include <sys/constants.h>
 
 #include <kernel/multiboot.h>
-
 #include <stdint.h>
 
 int kernel_init(struct multiboot_info *mboot_info);

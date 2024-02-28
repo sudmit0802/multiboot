@@ -4,6 +4,7 @@
 #include <kernel/tty.h>
 
 #include <kernel/libk/string.h>
+#include <kernel/libk/math.h>
 
 uint8_t *framebuffer_addr;
 uint32_t framebuffer_pitch;
@@ -189,6 +190,37 @@ void draw_square(int x, int y, int width, int height, uint32_t color) {
     draw_vertical_line(x, y, height, color);
     draw_horizontal_line(x, y + height, width, color);
     draw_vertical_line(x + width, y, height, color);
+}
+
+void draw_filled_circle(int16_t x, int16_t y, int16_t rad, uint8_t r, uint8_t g, uint8_t b)
+{
+    int16_t diameter = rad * 2;
+
+    // Calculate the center of the circle
+    int16_t centerX = x + rad;
+    int16_t centerY = y + rad;
+
+    // Iterate over the bounding box of the circle
+    for (int16_t i = 0; i < diameter; ++i)
+    {
+        for (int16_t j = 0; j < diameter; ++j)
+        {
+            // Calculate the distance from the center of the circle to the current pixel
+            int16_t distanceX = abs(centerX - (x + i));
+            int16_t distanceY = abs(centerY - (y + j));
+            double distance = sqrt(distanceX * distanceX + distanceY * distanceY);
+
+            // Check if the current pixel is inside the circle
+            if (distance <= rad)
+            {
+                // Set the pixel color
+                set_pixel(x + i, y + j, (r << 16) | (g << 8) | b);
+                set_pixel(x + i, y + diameter - j, (r << 16) | (g << 8) | b); // Reflect horizontally
+                set_pixel(x + diameter - i, y + j, (r << 16) | (g << 8) | b); // Reflect vertically
+                set_pixel(x + diameter - i, y + diameter - j, (r << 16) | (g << 8) | b); // Reflect horizontally and vertically
+            }
+        }
+    }
 }
 
 void draw_fill(int start_x, int start_y, int length_across, int length_down, uint32_t color) {

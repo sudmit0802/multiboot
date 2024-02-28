@@ -10,6 +10,14 @@
         "vesafb.h": "c",
         "tty.h": "c",
         "kernel.h": "c",
-        "random": "cpp"
+        "random": "cpp",
+        "virt_memory.h": "c",
+        "kheap.h": "c",
+        "interrupts.h": "c",
+        "tss.h": "c",
+        "gdt.h": "c",
+        "math.h": "c",
+        "stdint.h": "c",
+        "snake.h": "c"
     }
 }
