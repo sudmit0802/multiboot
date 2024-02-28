@@ -49,6 +49,7 @@ void gdt_set_gate(int32_t num, uint32_t base, uint32_t limit, uint8_t access,
 // finally call gdt_flush() in our assembler file in order to tell the
 // processor where the new GDT is and update the new segment registers
 void gdt_install() {
+    
     // Setup the GDT pointer and limit
     gp.limit = (sizeof(struct gdt_entry) * GDT_MAX_DESCRIPTORS) - 1;
     gp.base = (uint32_t) &gdt;
@@ -64,15 +65,13 @@ void gdt_install() {
         1   code segment is readable
         0   access bit, always 0, cpu set this to 1 when accessing this sector
     */
+
     gdt_set_gate(1, 0, 0xFFFFFFFF, 0x9A, 0xCF); // Kernel code segment
-    /* Kernel data, access(92 = 1 00 1 0 0 1 0)
-        Only differ at the fifth bit(counting from least insignificant bit), 0 means it's a data segment.
-    */
     gdt_set_gate(2, 0, 0xFFFFFFFF, 0x92, 0xCF); // Kernel data segment
+
     // User code and data segments respectively, only differ from pervious in ring number(ring 3)
-    gdt_set_gate(3, 0, 0xFFFFFFFF, 0xFA, 0xCF); // added 27.02.20
-    gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); // added 27.02.20
-    // Flush out the old GDT and install the new changes!
+    gdt_set_gate(3, 0, 0xFFFFFFFF, 0xFA, 0xCF); 
+    gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); 
     gdt_flush(&gp);
 
     // Initialize TSS
