@@ -49,19 +49,7 @@ int kernel_init(struct multiboot_info *mboot_info) {
   framebuffer_size = framebuffer_height * framebuffer_pitch;
   back_framebuffer_addr = framebuffer_addr;
 
-<<<<<<< HEAD
-  gdt_install();
-  idt_install();
-  pmm_init(mboot_info);
 
-  vmm_init();
-  kheap_init();
-  init_vbe(mboot_info);
-
-  tty_printf("framebuffer_addr = %x\n", framebuffer_addr);
-  tty_printf("framebuffer_size = %x\n", framebuffer_size);
-  tty_printf("Resolution is %dx%d\n", VESA_WIDTH, VESA_HEIGHT);
-=======
     gdt_install();
     idt_install();
     pmm_init(mboot_info);
@@ -76,11 +64,10 @@ int kernel_init(struct multiboot_info *mboot_info) {
     interrupt_disable_all();
     keyboard_install();
     interrupt_enable_all();
->>>>>>> 38b8870 (- syscalls)
+
 
   interrupt_disable_all();
   keyboard_install();
-  syscall_init();
   interrupt_enable_all();
 
   return 1;
@@ -171,7 +158,6 @@ void kernel_main(int magic_number,
           break;
       }
       color = HSVtoRGB(i % 256, 255, 255 * (i < maxIterations));
-<<<<<<< HEAD
       set_pixel(x, y, color & 0xFFFFFF);
     }
   tty_setcolor(VESA_BLACK);
@@ -184,18 +170,5 @@ void kernel_main(int magic_number,
   for (;;) {
     asm("hlt");
   }
-=======
-      set_pixel(x,y,color&0xFFFFFF);
-    }
-    tty_setcolor(VESA_BLACK);
-    tty_update_cursor(0,0);
-    char cmd[1];
-    while (1) {
-        keyboard_gets(cmd, 1);
-    }
-    
-    //for (; ; ) {
-    //    asm("hlt");
-    //}
->>>>>>> 38b8870 (- syscalls)
+
 }
