@@ -16,7 +16,7 @@
 .long CHECKSUM
 .long 0, 0, 0, 0, 0
 .long 0 				# 0 = set graphics mode
-.long 800, 600, 32 	    # Width, height, depth
+.long 1440, 900, 32 	    # Width, height, depth
 
 
 # Reserve a stack for the initial thread.

@@ -5,7 +5,7 @@ TARGET_ISO=TheGame.iso
 LOGFILE=TheGame_serial.log
 
 
-all: build-iso-run
+
 
 check-multiboot: $(KERNEL_FILE)
 	 grub-file --is-x86-multiboot $(KERNEL_FILE)
@@ -37,7 +37,9 @@ clean:
 	 rm -rf $(LOGFILE)
 	make -C kernel -f Makefile clean
 
-run: clean clean-logs build-iso rerun
+all: build-iso
+
+run: clean clean-logs all rerun
 
 
 
