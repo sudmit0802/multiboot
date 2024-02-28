@@ -75,8 +75,6 @@ void ksh_main() {
             ksh_draw_demo();
         } else if (strcmp(cmd, "gui_test") == 0) {
             ksh_gui_test();
-        }  else if (strcmp(cmd, "syscall_test") == 0) {
-            ksh_syscall_test();
         } else if (strcmp(cmd, "pwd") == 0) {
             ksh_cmd_pwd();
         } else if (strlen(cmd) > 4 && strncmp(cmd, "cat ", 4) == 0) {
@@ -328,14 +326,6 @@ void ksh_cmd_run(char *fname) {
         return;
     }
     tty_printf("\nProgram exited with code %d\n", status);
-}
-
-void ksh_syscall_test() {
-    char *str = "Hello i'm system call !\n";
-    unsigned i = 0;
-    while (*(str + i)) {
-        asm("int $0x40" ::"a"(63), "b"(1), "c"(*(str + i++)));
-    }
 }
 
 void ksh_cmd_help() {
