@@ -10,5 +10,6 @@
         "vesafb.h": "c",
         "tty.h": "c",
         "kernel.h": "c",
+        "random": "cpp"
     }
 }

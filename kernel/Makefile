@@ -46,7 +46,8 @@ OBJ =\
 	mm/virt_memory.o			\
 	mm/kheap.o 					\
 	fs/vfs.o					\
-	graphics/vgafnt.o
+	graphics/vgafnt.o			\
+	snake.o
 
 all: $(TARGET_ELF)
 

@@ -7,15 +7,6 @@
 
 #include <stdint.h>
 
-//#define KERNEL_FILENAME "kernel.elf"
-//#define KERNEL_PID      0
-
-//#define KERNEL_QUICKMAP_VADDRESS (void*) 0xC0000000
-//#define KERNEL_CODE_VADDRESS     (void*) 0xC0001000
-//#define KERNEL_HEAP_VADDRESS     (void*) 0xD0000000
-//#define KERNEL_VGA_VADDRESS      (void*) 0x000B8000
-//#define KERNEL_VGA_PADDRESS      (void*) 0x000B8000
-
 int kernel_init(struct multiboot_info *mboot_info);
 void higher_half_test();
 
