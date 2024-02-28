@@ -1,52 +1,49 @@
-ISODIR := iso
-MULTIBOOT := $(ISODIR)/boot/my_game.elf
-MAIN := my_game.img
+# Makefile for building TheGame
+KERNEL_FILE=bin/kernel/kernel.elf
+ISODIR=isodir/
+TARGET_ISO=TheGame.iso
+LOGFILE=TheGame_serial.log
 
-CC := gcc
-CFLAGS := -m32 -Wall -fno-builtin -nostdinc -nostdlib -std=gnu99
-LDFLAGS := -ffreestanding -m32 -nostdlib
-AS := as
+# if we're on Windows use WSL to run bash commands
+ifeq ($(OS),Windows_NT) 
+    BASH = wsl
+else
+    BASH =
+endif
 
-SRC_DIR := common x86emu
-OBJ_DIR := obj
+all: build-iso-run
 
-SRC_C := $(wildcard $(addsuffix /*.c,$(SRC_DIR)))
-SRC_S := $(wildcard $(addsuffix /*.s,$(SRC_DIR)))
+check-multiboot: $(KERNEL_FILE)
+	$(BASH) grub-file --is-x86-multiboot $(KERNEL_FILE)
 
-SRC_OBJ := $(patsubst %.c,$(OBJ_DIR)/%.o,$(notdir $(SRC_C)))
-SRC_OBJ += $(patsubst %.s,$(OBJ_DIR)/%.o,$(notdir $(SRC_S)))
+compile-kernel:
+	make -C kernel -f Makefile DEBUG=$(DEBUG)
 
-$(OBJ_DIR)/%.o: common/%.c
-	$(CC) -Ix86emu -Iinclude $(CFLAGS) -o $@ -c $<
+build-iso: compile-kernel check-multiboot
+	$(BASH) rm -rf $(ISODIR)
+	$(BASH) mkdir -p $(ISODIR)boot
+	$(BASH) mkdir -p $(ISODIR)boot/grub
+	$(BASH) cp $(KERNEL_FILE) $(ISODIR)boot/kernel.elf
+	$(BASH) cp grub/grub.cfg $(ISODIR)boot/grub/grub.cfg
+	$(BASH) grub-mkrescue -o $(TARGET_ISO) $(ISODIR)
 
-$(OBJ_DIR)/%.o: common/%.s
-	$(AS) -32 $< -o $@
+clean-logs:
+	$(BASH) rm -rf $(LOGFILE)
 
-$(OBJ_DIR)/%.o: x86emu/%.c
-	$(CC) -Ix86emu -Iinclude $(CFLAGS) -o $@ -c $<
+run-iso: clean-logs
+ifeq ($(DEBUG),1)
+	qemu-system-i386 -s -S -m 512 -cdrom $(TARGET_ISO) -monitor stdio -serial file:$(LOGFILE) & gdb $(KERNEL_FILE) -ex "target remote localhost:1234" -tui
+else
+	qemu-system-i386 -m 2024 -cdrom $(TARGET_ISO) -monitor stdio -serial file:$(LOGFILE)
+endif
 
-$(MULTIBOOT): $(SRC_OBJ)
-	$(CC) $(LDFLAGS) -o '$@' -T linker.ld $^ -lgcc
-	grub-mkrescue -o '$(MAIN)' '$(ISODIR)'
-
-all: $(MULTIBOOT)
+build-iso-run: build-iso run-iso
 
 clean:
-	rm -rf $(OBJ_DIR)/*.o
-	rm -rf $(MAIN)
+	$(BASH) rm -rf $(ISODIR)
+	$(BASH) rm -rf $(TARGET_ISO)
+	$(BASH) rm -rf $(LOGFILE)
+	make -C kernel -f Makefile clean
 
-rebuild: clean all
 
-run: rebuild
-	qemu-system-i386 \
-    -monitor stdio \
-    -vga std \
-    -machine accel=tcg \
-    -m 2G \
-    -no-reboot \
-    -no-shutdown \
-    -drive 'file=$(MAIN),format=raw' \
-    -boot once=c,menu=on \
-    -net none
 
-.PHONY: all clean rebuild run

@@ -1,9 +1,10 @@
 {
+    "C_Cpp.default.includePath": [
+        "${workspaceRoot}"
+    ],
     "files.associations": {
         "*.py": "python",
-        "types.h": "c",
-        "setjmp.h": "c",
-        "io.h": "c",
-        "x86emu.h": "c"
+        "ports.h": "c",
+        "stb_image.h": "c"
     }
 }

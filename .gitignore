@@ -1,3 +1,9 @@
-*.o
-*.img
-*.elf
+*.o 
+*/*.o
+*/*/*.o
+*/*/*.log
+*.log
+*.iso
+initrd/*
+bin/*
+isodir/*
