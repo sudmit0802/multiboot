@@ -4,7 +4,11 @@
     ],
     "files.associations": {
         "*.py": "python",
-        "ports.h": "c",
-        "stb_image.h": "c"
+        "phys_memory.h": "c",
+        "idt.h": "c",
+        "cpu_detect.h": "c",
+        "vesafb.h": "c",
+        "tty.h": "c",
+        "kernel.h": "c",
     }
 }

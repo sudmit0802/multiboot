@@ -134,8 +134,6 @@ char keyboard_event_convert(kbd_event e) {
 
 // Keyboard IRQ handler
 void keyboard_handler(__attribute__((unused)) struct regs *r) {
-    // qemu_printf("keyboard_handler() start\n");
-    // qemu_printf("regular_scancodes[0] = %x %c\n", regular_scancodes[0].scancode, regular_scancodes[0].chr);
     static kbd_event state = { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     kbd_irq_fired = true;
 
@@ -153,9 +151,7 @@ void keyboard_handler(__attribute__((unused)) struct regs *r) {
     case KEY_LCTRL:  state.lctrl  = !state.release; break;
     case KEY_RCTRL:  state.rctrl  = !state.release; break;
     case 0xE0: state.code |= 0x100;
-    //case 0xE1: state.code |= 0x200;
-    //case 0xF0: state.release = 1;
-    //default:   state.release = 0;
+
     }
 
     if (scancode != 0xE0 && scancode != 0xE1) {
@@ -164,17 +160,13 @@ void keyboard_handler(__attribute__((unused)) struct regs *r) {
         state.code = 0;
         state.release = 0;
     }
-    // qemu_printf("keyboard_handler() end\n");
 }
 
 uint8_t keyboard_getchar() {
-    // qemu_printf("keyboard_getchar()\n");
 
     char ret = 0;
     while (ret == 0) {
-        // If the queue is empty, try to wait, rush B otherwise
         if (kbd_buf_in == kbd_buf_out) {
-            //sleep(1);
             keyboard_wait_irq();
         }
         ret = keyboard_event_convert(keyboard_buffer_pop());
@@ -186,7 +178,6 @@ uint8_t keyboard_getchar() {
 }
 
 size_t keyboard_gets(char *s, size_t lim) {
-    // qemu_printf("keyboard_gets()\n");
 
     uint8_t c = 0;
     size_t i = 0;

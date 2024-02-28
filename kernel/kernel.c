@@ -6,14 +6,11 @@
 #include <kernel/gdt.h>
 #include <kernel/idt.h>
 #include <kernel/interrupts.h>
-#include <kernel/ksh.h>
 #include <kernel/tss.h>
 #include <kernel/tty.h>
-#include <kernel/vga.h>
 
 // Devices
 #include <kernel/devices/keyboard.h>
-#include <kernel/devices/mouse.h>
 #include <kernel/devices/timer.h>
 
 // Memory manager
@@ -22,11 +19,7 @@
 #include <kernel/mm/virt_memory.h>
 
 // File system
-#include <kernel/fs/initrd.h>
 #include <kernel/fs/vfs.h>
-
-// Syscalls
-#include <kernel/syscall.h>
 
 // Graphics
 #include <kernel/graphics/vesafb.h>
@@ -49,21 +42,20 @@ int kernel_init(struct multiboot_info *mboot_info) {
   framebuffer_size = framebuffer_height * framebuffer_pitch;
   back_framebuffer_addr = framebuffer_addr;
 
+  gdt_install();
+  idt_install();
+  pmm_init(mboot_info);
+  vmm_init();
+  kheap_init();
+  init_vbe(mboot_info);
 
-    gdt_install();
-    idt_install();
-    pmm_init(mboot_info);
-    vmm_init();
-    kheap_init();
-    init_vbe(mboot_info);
-
-    tty_printf("framebuffer_addr = %x\n", framebuffer_addr);
-    tty_printf("framebuffer_size = %x\n", framebuffer_size);
-    tty_printf("Resolution is %dx%d\n", VESA_WIDTH, VESA_HEIGHT);
-   
-    interrupt_disable_all();
-    keyboard_install();
-    interrupt_enable_all();
+  tty_printf("framebuffer_addr = %x\n", framebuffer_addr);
+  tty_printf("framebuffer_size = %x\n", framebuffer_size);
+  tty_printf("Resolution is %dx%d\n", VESA_WIDTH, VESA_HEIGHT);
+  
+  interrupt_disable_all();
+  keyboard_install();
+  interrupt_enable_all();
 
 
   interrupt_disable_all();
@@ -119,9 +111,7 @@ int HSVtoRGB(int _h, int _s, int _v) {
   return ((int)(r * 255) << 16) | ((int)(g * 255) << 8) | (int)(b * 255);
 }
 
-void kernel_main(int magic_number,
-                 struct multiboot_info
-                     *mboot_info) // Arguments are passed by _start in boot.s
+void kernel_main(int magic_number, struct multiboot_info *mboot_info) // Arguments are passed by _start in boot.s
 {
 
   asm("movl %%esp,%0" : "=r"(kernel_stack_top_vaddr));
@@ -160,6 +150,7 @@ void kernel_main(int magic_number,
       color = HSVtoRGB(i % 256, 255, 255 * (i < maxIterations));
       set_pixel(x, y, color & 0xFFFFFF);
     }
+
   tty_setcolor(VESA_BLACK);
   tty_update_cursor(0, 0);
   char cmd[1];
