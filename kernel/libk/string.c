@@ -221,20 +221,13 @@ int memcmp(const void *s1, const void *s2, size_t n) { /* Length to compare */
     return 0;
 }
 
+int rand(int *seed)
+{
+    *seed = (*seed * 1103515245 + 12345) & 0x7fffffff;
+    return *seed;
+}
 void *memcpy(void *dst, const void *src, size_t n) {
-    /*
-    size_t i;
-    if ((uint8_t*) (dst) < (uint8_t*) (src)) {
-        for (i = 0; i < n; ++i) {
-            ((uint8_t*) (dst))[i] = ((uint8_t*) (src))[i];
-        }
-    } else {
-        for (i = 0; i < n; ++i) {
-            ((uint8_t*) (dst))[n - i - 1] = ((uint8_t*) (src))[n - i - 1];
-        }
-    }
-    return dst;
-    */
+
 
     uint32_t num_dwords = n / 4;
     uint32_t num_bytes = n % 4;

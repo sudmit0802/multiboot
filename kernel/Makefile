@@ -5,21 +5,17 @@ TARGET_DIR=../bin/kernel/
 INCLUDE_DIR=../
 
 AS = i686-linux-gnu-as
-CC = i686-linux-gnu-gcc
+CC = i686-linux-gnu-gcc-11
 
 # if we're on Windows use WSL to run bash commands
-ifeq ($(OS),Windows_NT) 
-    BASH = wsl
-else
-    BASH =
-endif
 
-LDFLAGS=-T linker.ld -ffreestanding -nostdlib -lgcc
-ifeq ($(DEBUG), 1)
-	CCFLAGS=-std=gnu99 -g -ffreestanding -Wall -Wextra -I $(INCLUDE_DIR)
-else
-	CCFLAGS=-std=gnu99 -ffreestanding -Wall -Wextra -I $(INCLUDE_DIR)
-endif
+BASH =
+
+
+LDFLAGS=-T linker.ld -ffreestanding -nostdlib -lgcc 
+
+CCFLAGS=-std=gnu99 -ffreestanding -Wall -Wextra -I $(INCLUDE_DIR)
+
 
 OBJ =\
 	boot.o kernel.o 			\
@@ -53,10 +49,10 @@ all: $(TARGET_ELF)
 
 $(TARGET_ELF): $(OBJ)
 	$(BASH) mkdir -p $(TARGET_DIR)
-	$(CC) $(LDFLAGS) -o $(TARGET_DIR)$(TARGET_ELF) $(OBJ)
+	$(CC) $(LDFLAGS) -o $(TARGET_DIR)$(TARGET_ELF) $(OBJ) -lSDL2
 
 %.o: %.c
-	$(CC) $(CCFLAGS) -c -o $@ $<
+	$(CC) $(CCFLAGS) -c -o $@ $< 
 
 %.o: %.s
 	$(AS) -o $@ $<

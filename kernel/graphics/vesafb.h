@@ -42,6 +42,7 @@ void draw_vertical_line(int x, int y,int length, uint32_t color);
 void draw_square(int x, int y, int width, int height, uint32_t color);
 void draw_filled_circle(int16_t x, int16_t y, int16_t rad, uint8_t r, uint8_t g, uint8_t b);
 void draw_fill(int start_x, int start_y, int length_across, int length_down, uint32_t color);
+void draw_fill_easy(int start_x, int start_y, int length_across, int length_down, uint32_t color);
 
 void draw_vga_character(uint8_t c, int x, int y, int fg, int bg, bool bgon);
 void draw_text_string(const char *text, int x, int y, int fg, int bg, bool bgon);

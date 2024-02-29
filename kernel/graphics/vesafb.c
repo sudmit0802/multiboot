@@ -232,6 +232,19 @@ void draw_fill(int start_x, int start_y, int length_across, int length_down, uin
     }
 }
 
+void draw_fill_easy(int start_x, int start_y, int length_across, int length_down, uint32_t color) {
+    int i, j;
+    for (i = 0; i < length_down; i++) {
+        for (j = 0; j < length_across; j++) {
+            
+            if(get_pixel(start_x + j, start_y + i) != color)
+            {
+                set_pixel(start_x + j, start_y + i, color);
+            }
+        }
+    }
+}
+
 void draw_vga_character(uint8_t c, int x, int y, int fg, int bg, bool bgon) {
     int cx, cy;
     int mask[8] = { 128, 64, 32, 16, 8, 4, 2, 1 };
