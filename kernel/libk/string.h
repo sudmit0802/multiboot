@@ -24,7 +24,7 @@ size_t str_bksp(char *str, char c);
 
 
 int atoi(const char*);
-char* itoa(int, char*, int);
+void itoa(int, char[]);
 
 int memcmp(const void*, const void*, size_t);
 void* memmove(void* , void* , size_t);

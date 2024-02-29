@@ -97,9 +97,10 @@ void keyboard_wait_irq() {
     // qemu_printf("keyboard_wait_irq() end\n");
 }
 
+
+
 // Convert keyboard event structure to char
 char keyboard_event_convert(kbd_event e) {
-    // qemu_printf("keyboard_event_convert()\n");
     if (!e.exists || e.release) {
         return 0;
     }
@@ -132,14 +133,13 @@ char keyboard_event_convert(kbd_event e) {
     }
 }
 
+
+
 // Keyboard IRQ handler
 void keyboard_handler(__attribute__((unused)) struct regs *r) {
     static kbd_event state = { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     kbd_irq_fired = true;
-
-    // We need to put every pressed printable key to the buffer.
     uint8_t scancode = inb(KBD_DATA);
-    // qemu_printf("SCANCODE = %x\n", scancode);
     if (scancode > 0x80 && scancode < 0xE0) {
         state.release = 1;
         scancode -= 0x80;
@@ -151,7 +151,6 @@ void keyboard_handler(__attribute__((unused)) struct regs *r) {
     case KEY_LCTRL:  state.lctrl  = !state.release; break;
     case KEY_RCTRL:  state.rctrl  = !state.release; break;
     case 0xE0: state.code |= 0x100;
-
     }
 
     if (scancode != 0xE0 && scancode != 0xE1) {
@@ -163,7 +162,7 @@ void keyboard_handler(__attribute__((unused)) struct regs *r) {
 }
 
 uint8_t keyboard_getchar() {
-
+    
     char ret = 0;
     while (ret == 0) {
         if (kbd_buf_in == kbd_buf_out) {
@@ -174,6 +173,7 @@ uint8_t keyboard_getchar() {
     if (tty_feedback) {
         tty_putchar(ret);
     }
+    tty_printf("%c", ret);
     return ret;
 }
 
@@ -187,7 +187,6 @@ size_t keyboard_gets(char *s, size_t lim) {
 
     while (true) {
         c = keyboard_getchar();
-        tty_printf("%c", c);
         if (c > 0) {
             if (c == '\b') {
                 if (i > 0) {

@@ -123,15 +123,19 @@ void kernel_main(int magic_number, struct multiboot_info *mboot_info) // Argumen
 
   uint32_t esp;
   asm volatile("mov %%esp, %0" : "=r"(esp));
+
   tss_set_stack(0x10, esp);
 
-  draw_filled_circle(100, 100, 50, 255, 0, 0);
+  //renderScore(10, 24, 30, 10);
+  //renderFood(200, 150, 24);
+  draw_fill(0, 0, VESA_WIDTH, VESA_HEIGHT, VESA_BLACK);
+  snake();
 
   tty_setcolor(VESA_BLACK);
   tty_update_cursor(0, 0);
-  char cmd[1];
+ 
   while (1) {
-    keyboard_gets(cmd, 1);
+    keyboard_getchar();
   }
 
   for (;;) {
