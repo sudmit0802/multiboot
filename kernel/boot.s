@@ -81,9 +81,11 @@ _start:
 	push %ebx # Multiboot structure
 	push %eax # Multiboot magic number
 	call kernel_main
-	cli
-
-1:	hlt
+  cli   
+   
+1:
+  movb $0xFE, %al    
+  outb %al, $0x64 
 	jmp 1b
-
+  
 .size _start, . - _start

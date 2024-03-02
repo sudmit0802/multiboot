@@ -16,21 +16,7 @@ uint32_t framebuffer_size;
 uint8_t *back_framebuffer_addr;
 
 void init_vbe(multiboot_info_t *mboot) {
-    //if (mboot->framebuffer_type != 1) {
-        //panic
-        //tty_printf("Invalid framebuffer type\n");
-        //return;
-    //}
 
-    //framebuffer_addr = vmm_temp_map_page((uint8_t*) (*mboot).framebuffer_addr);
-    //framebuffer_addr = (uint8_t*) (*mboot).framebuffer_addr;
-    //framebuffer_pitch = mboot->framebuffer_pitch;
-    //framebuffer_bpp = mboot->framebuffer_bpp;
-    //framebuffer_width = mboot->framebuffer_width;
-    //framebuffer_height = mboot->framebuffer_height;
-
-    //tty_printf("lfb = %x\n", mboot->framebuffer_addr);
-    //tty_printf("bpp = %x\n", mboot->framebuffer_bpp);
 
     svga_mode_info_t *svga_mode = (svga_mode_info_t*) mboot->vbe_mode_info;
     framebuffer_addr = (uint8_t *)svga_mode->physbase; //vmm_temp_map_page(svga_mode->physbase);
@@ -43,34 +29,19 @@ void init_vbe(multiboot_info_t *mboot) {
 
     uint8_t *frame, *virt;
     for (frame = framebuffer_addr, virt = framebuffer_addr;
-         frame < (framebuffer_addr + framebuffer_size/*0x00400000*//*0x002C0000 0x000F0000*/);
+         frame < (framebuffer_addr + framebuffer_size);
          frame += PAGE_SIZE, virt += PAGE_SIZE) {
         vmm_map_page(frame, virt);
     }
 
     create_back_framebuffer();
-
-    //tty_printf("xxx = %x\n", *(uint8_t *)0xC0800000);
-
-    /*
-    size_t i;
-    for (i = 0; i < framebuffer_size; ++i) {
-        ((uint8_t*) (back_framebuffer_addr))[i] = 0;
-    }
-    */
-
-    //back_framebuffer_addr = framebuffer_addr;
-
-    //asm volatile( "movl %0, %%ecx" :: "r" (framebuffer_pitch));
-    //for (;;) asm("hlt");
 }
 
 void create_back_framebuffer() {
-    //flush_tlb_entry(back_framebuffer_addr);
+    
     back_framebuffer_addr = kmalloc(framebuffer_size);
     tty_printf("back_framebuffer_addr = %x\n", back_framebuffer_addr);
-    //tty_printf("init_vbe: [c0800000]->%x\n", page_table_entry_is_writable(GET_PTE(0xC0800000)));
-    memset(back_framebuffer_addr, 0, framebuffer_size); //causes page fault at c0800000 when this line is placed in the end of init_vbe
+    memset(back_framebuffer_addr, 0, framebuffer_size); 
 }
 
 void set_pixel(int x, int y, uint32_t color) {
@@ -83,12 +54,8 @@ void set_pixel(int x, int y, uint32_t color) {
     unsigned where = x * (framebuffer_bpp / 8) + y * framebuffer_pitch;
 
     framebuffer_addr[where] = color;
-    framebuffer_addr[where + 1] = color >> 8;
-    framebuffer_addr[where + 2] = color >> 16;
-
-    back_framebuffer_addr[where] = color & 255;
-    back_framebuffer_addr[where + 1] = (color >> 8) & 255;
-    back_framebuffer_addr[where + 2] = (color >> 16) & 255;
+    framebuffer_addr[where + 1] = (color >> 8);
+    framebuffer_addr[where + 2] = (color >> 16);
 
 }
 
@@ -124,23 +91,16 @@ void set_pixel_alpha(int x, int y, rgba_color color) {
 
             framebuffer_addr[where] = res[0]; 
             framebuffer_addr[where + 1] = res[1]; 
-            framebuffer_addr[where + 2] = res[2]; 
-
-            back_framebuffer_addr[where] = res[0]; 
-            back_framebuffer_addr[where + 1] = res[1]; 
-            back_framebuffer_addr[where + 2] = res[2];
+            framebuffer_addr[where + 2] = res[2];
             
         } else { // if absolutely transparent dont draw anything
             return;
         }
     } else { // if non transparent just draw rgb
-        framebuffer_addr[where] = color.b & 255;
-        framebuffer_addr[where + 1] = color.g & 255;
-        framebuffer_addr[where + 2] = color.r & 255;
-
-        back_framebuffer_addr[where] = color.b & 255;
-        back_framebuffer_addr[where + 1] = color.g & 255;
-        back_framebuffer_addr[where + 2] = color.r & 255;
+    
+        framebuffer_addr[where] = color.b;
+        framebuffer_addr[where + 1] = color.g;
+        framebuffer_addr[where + 2] = color.r;
     }
 }
 
@@ -167,6 +127,17 @@ uint32_t rgb(uint8_t r, uint8_t g, uint8_t b) {
 
 uint32_t rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
     return (a * 0x1000000) + (r * 0x10000) + (g * 0x100) + (b * 0x1);
+}
+
+rgba_color rgba_reverse(uint32_t color) {
+    rgba_color result;
+    
+    result.a = (color >> 24) & 0xFF; // Извлекаем старший байт для альфа-канала
+    result.r = (color >> 16) & 0xFF; // Следующий байт для красного
+    result.g = (color >> 8) & 0xFF;  // Затем для зелёного
+    result.b = color & 0xFF;         // И последний байт для синего
+    
+    return result;
 }
 
 void draw_horizontal_line(int x, int y,int length, uint32_t color) {
@@ -232,18 +203,6 @@ void draw_fill(int start_x, int start_y, int length_across, int length_down, uin
     }
 }
 
-void draw_fill_easy(int start_x, int start_y, int length_across, int length_down, uint32_t color) {
-    int i, j;
-    for (i = 0; i < length_down; i++) {
-        for (j = 0; j < length_across; j++) {
-            
-            if(get_pixel(start_x + j, start_y + i) != color)
-            {
-                set_pixel(start_x + j, start_y + i, color);
-            }
-        }
-    }
-}
 
 void draw_vga_character(uint8_t c, int x, int y, int fg, int bg, bool bgon) {
     int cx, cy;
@@ -272,3 +231,5 @@ void draw_text_string(const char *text, int x, int y, int fg, int bg, bool bgon)
         }
     }
 }
+
+

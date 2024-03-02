@@ -21,10 +21,10 @@ extern uint32_t framebuffer_size;
 extern uint8_t *back_framebuffer_addr;
 
 typedef struct rgba_struct {
-    uint32_t r;
-    uint32_t g;
-    uint32_t b;
-    uint32_t a;
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+    uint8_t a;
 } rgba_color;
 
 void init_vbe(multiboot_info_t *mboot);
@@ -36,14 +36,13 @@ uint32_t get_pixel(int x, int y);
 
 uint32_t rgb(uint8_t r, uint8_t g, uint8_t b);
 uint32_t rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
-
+rgba_color rgba_reverse(uint32_t color);
+void rgba_blend(uint8_t result[4], uint8_t fg[4], uint8_t bg[4]);
 void draw_horizontal_line(int x, int y,int length, uint32_t color);
 void draw_vertical_line(int x, int y,int length, uint32_t color);
 void draw_square(int x, int y, int width, int height, uint32_t color);
 void draw_filled_circle(int16_t x, int16_t y, int16_t rad, uint8_t r, uint8_t g, uint8_t b);
 void draw_fill(int start_x, int start_y, int length_across, int length_down, uint32_t color);
-void draw_fill_easy(int start_x, int start_y, int length_across, int length_down, uint32_t color);
-
 void draw_vga_character(uint8_t c, int x, int y, int fg, int bg, bool bgon);
 void draw_text_string(const char *text, int x, int y, int fg, int bg, bool bgon);
 

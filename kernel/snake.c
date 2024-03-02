@@ -1,51 +1,52 @@
-#include <kernel/snake.h>
 #include <kernel/graphics/vesafb.h>
+#include <kernel/graphics/render.h>
 #include <kernel/devices/keyboard.h>
-#include <kernel/tty.h>
-
+#include <kernel/mm/kheap.h>
 #include <kernel/libk/string.h>
 #include <kernel/libk/math.h>
 
-#define max(a, b) ((a) > (b) ? (a) : (b))
-#define min(a, b) ((a) < (b) ? (a) : (b))
-int seed = 115;
+#include <kernel/snake.h>
+#include <kernel/tty.h>
 
-void renderPlayer(int x, int y, int scale, int* tailX, int* tailY, size_t tailLength)
+int seed = 888;
+
+void renderPlayer(Renderer_t renderer, int x, int y, int scale, int* tailX, int* tailY, size_t tailLength)
 {
     
 	// Renders tail circles
 	for (size_t i = 0; tailLength>0 && i < tailLength - 1; i++)
 	{
 		// Render the current tail circle
-		draw_filled_circle(tailX[i], tailY[i], scale / 2, 0, 220, 0);
+		render_filled_circle(renderer, tailX[i], tailY[i], scale / 2, 0, 220, 0);
 
 		// Calculate the midpoint between current and next tail circles
 		int midX = (tailX[i] + tailX[i + 1]) / 2;
 		int midY = (tailY[i] + tailY[i + 1]) / 2;
 
 		// Render the interpolated circle
-		draw_filled_circle(midX, midY, scale / 2, 0, 220, 0);
+		render_filled_circle(renderer, midX, midY, scale / 2, 0, 220, 0);
 	}
 
 	if (tailLength > 0)
 	{
-		draw_filled_circle( tailX[tailLength - 1], tailY[tailLength - 1], scale / 2, 0, 220, 0);
+		render_filled_circle(renderer, tailX[tailLength - 1], tailY[tailLength - 1], scale / 2, 0, 220, 0);
 
 		int midX = (tailX[tailLength - 1] + x) / 2;
 		int midY = (tailY[tailLength - 1] + y) / 2;
-		draw_filled_circle( midX, midY, scale / 2, 0, 220, 0);
+		render_filled_circle(renderer, midX, midY, scale / 2, 0, 220, 0);
 	}
 
 	// Renders the player circle
-	draw_filled_circle(x, y, scale / 2, 0, 130, 0);
+	render_filled_circle(renderer, x, y, scale / 2, 0, 130, 0);
+	render_head(renderer, x, y, scale / 2);
 }
 
-void renderFood(int foodx, int foody, int scale)
+void renderFood(Renderer_t renderer, int foodx, int foody, int scale)
 {
-	draw_filled_circle( foodx, foody, scale / 2, 255, 0, 0);
+	render_filled_circle(renderer, foodx, foody, scale / 2, 255, 0, 0);
 }
 
-void renderScore(size_t tailLength, int scale, int x_offset, int y_offset)
+void renderScore(Renderer_t renderer, size_t tailLength, int scale, int x_offset, int y_offset)
 {
     char score_str[] = "S c o r e : ";
     char number[32];
@@ -53,7 +54,7 @@ void renderScore(size_t tailLength, int scale, int x_offset, int y_offset)
 
     itoa(tailLength * 10, number);
     strcat(score_str, number);
-	draw_text_string(score_str , x_offset + ((scale * scale) / 2) - 75, y_offset, VESA_WHITE, VESA_BLACK, false);
+	render_text_string(renderer, score_str , x_offset + ((scale * scale) / 2) - 75, y_offset, VESA_WHITE+0xFF000000, VESA_BLACK+0xFF000000, false);
 }
 
 size_t get_int_array_size(int* array)
@@ -111,33 +112,24 @@ void getFoodSpawn(int* foodLoc, int* tailX, int* tailY, int playerX, int playerY
 	return;
 }
 
-
-
-void gameOver(int scale, size_t tailLength, int x_offset, int y_offset)
+void gameOver(Renderer_t renderer, int scale, size_t tailLength, int x_offset, int y_offset)
 {
 	
-    int tmr = 0;
-    while (tmr<500000000)
-    {
-        tmr++;
-    }
-
-    draw_fill_easy(0, 0, VESA_WIDTH, VESA_HEIGHT, VESA_BLACK);
+    render_fill(renderer, 0, 0, VESA_WIDTH, VESA_HEIGHT, VESA_BLACK+0xFF000000);
 
     char gm_over_str[] = "G a m e  O v e r";
-	draw_text_string(gm_over_str , x_offset + ((scale * scale) / 2) - 50, y_offset + ((scale * scale) / 2), VESA_RED, VESA_BLACK, false);
+	render_text_string(renderer, gm_over_str , x_offset + ((scale * scale) / 2) - 50, y_offset + ((scale * scale) / 2), VESA_RED+0xFF000000, VESA_BLACK+0xFF000000, false);
 
     char score_str[] = "S c o r e : ";
     char number[32];
     itoa(tailLength * 10, number);
     strcat(score_str, number);
-	draw_text_string(score_str , x_offset + ((scale * scale) / 2) - 50, y_offset, VESA_GREEN, VESA_BLACK, false);
+	render_text_string(renderer, score_str , x_offset + ((scale * scale) / 2) - 50, y_offset, VESA_GREEN+0xFF000000, VESA_BLACK+0xFF000000, false);
 
     char retry_str[] = "P r e s s  E n t e r  t o  p l a y  a g a i n";
-    draw_text_string(retry_str , x_offset + ((scale * scale) / 2) - 150, y_offset + ((scale * scale) / 2) - 175, VESA_WHITE, VESA_BLACK, false);
+    render_text_string(renderer, retry_str , x_offset + ((scale * scale) / 2) - 150, y_offset + ((scale * scale) / 2) - 175, VESA_WHITE+0xFF000000, VESA_BLACK+0xFF000000, false);
+    draw_rendered(renderer);
 
-
-    
 	while (true)
 	{
         kbd_event event = keyboard_buffer_pop();
@@ -151,22 +143,22 @@ void gameOver(int scale, size_t tailLength, int x_offset, int y_offset)
 }
 
 
-void youWin(int scale, size_t tailLength, int x_offset, int y_offset)
+void youWin(Renderer_t renderer, int scale, size_t tailLength, int x_offset, int y_offset)
 {
     
     char gm_over_str[] = "Y o u  w o n !";
-	draw_text_string(gm_over_str , x_offset + ((scale * scale) / 2) - 50, y_offset + ((scale * scale) / 2), VESA_RED, VESA_BLACK, false);
-    draw_fill_easy(0, 0, VESA_WIDTH, VESA_HEIGHT, VESA_BLACK);
+	render_text_string(renderer, gm_over_str , x_offset + ((scale * scale) / 2) - 50, y_offset + ((scale * scale) / 2), VESA_RED+0xFF000000, VESA_BLACK+0xFF000000, false);
+    render_fill(renderer, 0, 0, VESA_WIDTH, VESA_HEIGHT, VESA_BLACK+0xFF000000);
 
     char score_str[] = "S c o r e : ";
     char number[32];
     itoa(tailLength * 10, number);
     strcat(score_str, number);
-	draw_text_string(score_str , x_offset + ((scale * scale) / 2) - 50, y_offset, VESA_GREEN, VESA_BLACK, false);
+	render_text_string(renderer, score_str , x_offset + ((scale * scale) / 2) - 50, y_offset, VESA_GREEN+0xFF000000, VESA_BLACK+0xFF000000, false);
 
     char retry_str[] = "P r e s s  E n t e r  t o  p l a y  a g a i n";
-    draw_text_string(retry_str , x_offset + ((scale * scale) / 2) - 150, y_offset + ((scale * scale) / 2) - 175, VESA_WHITE, VESA_BLACK, false);
-    
+    render_text_string(renderer, retry_str , x_offset + ((scale * scale) / 2) - 150, y_offset + ((scale * scale) / 2) - 175, VESA_WHITE+0xFF000000, VESA_BLACK+0xFF000000, false);
+    draw_rendered(renderer);
 	while (true)
 	{
         kbd_event event = keyboard_buffer_pop();
@@ -181,16 +173,20 @@ void youWin(int scale, size_t tailLength, int x_offset, int y_offset)
 }
 
 
-typedef struct  {
- int x;
- int y;
- int h;
- int w;
-} GameObject;
+
 
 
 void snake()
 {
+    Renderer_t renderer = kmalloc(VESA_WIDTH * sizeof(rgba_color[VESA_HEIGHT])); // Allocate memory for the renderer array
+
+    if (renderer == NULL) {
+        return;
+    }
+
+    for (size_t raw = 0; raw < VESA_WIDTH; raw++) {
+        memset(renderer[raw], 0, VESA_HEIGHT * sizeof(rgba_color));
+    }
 
 	int scale = 24;
 
@@ -236,21 +232,20 @@ void snake()
 	// Main game loop, this constantly runs and keeps everything updated
 	while (true)
 	{
-        
         float delta = 1;
         kbd_event event = keyboard_buffer_pop();
-		started = false;
 
 		// Check win condition, tail needs to fill all tiles
 		if (tailLength >= (size_t)(scale * scale - 1))
 		{
-			youWin( scale, tailLength, x_offset, y_offset);
+			youWin(renderer, scale, tailLength, x_offset, y_offset);
 			x = x_offset + scale * scale / 2;
 			y = y_offset + scale * scale / 2;
 			up = false;
 			left = false;
 			right = false;
 			down = false;
+			started = false;
 			memset(tailX, 0, sizeof(tailX));
             memset(tailY, 0, sizeof(tailY));
 			tailLength = 0;
@@ -393,13 +388,14 @@ void snake()
 
 			if (x == tailX[i] && y == tailY[i])
 			{
-				gameOver( scale, tailLength, x_offset, y_offset);
+				gameOver(renderer, scale, tailLength, x_offset, y_offset);
 				x = x_offset + scale * scale / 2;
 				y = y_offset + scale * scale / 2;
 				up = false;
 				left = false;
 				right = false;
 				down = false;
+				started = false;
                 memset(tailX, 0, sizeof(tailX));
                 memset(tailY, 0, sizeof(tailY));
 				tailLength = 0;
@@ -419,13 +415,14 @@ void snake()
 		// Game over if player out of bounds, also resets the game state
 		if (x < x_offset || y < y_offset || x >= (int)(VESA_WIDTH - x_offset) || y >= (int)(VESA_HEIGHT - y_offset))
 		{
-			gameOver( scale, tailLength, x_offset, y_offset);
+			gameOver(renderer, scale, tailLength, x_offset, y_offset);
 			x = x_offset + scale * scale / 2;
 			y = y_offset + scale * scale / 2;
 			up = false;
 			left = false;
 			right = false;
 			down = false;
+			started = false;
             memset(tailX, 0, sizeof(tailX));
             memset(tailY, 0, sizeof(tailY));
 			tailLength = 0;
@@ -441,21 +438,19 @@ void snake()
 		}
 
 		// Render everything
-        draw_fill_easy(0, 0, VESA_WIDTH, VESA_HEIGHT, VESA_BLACK);
-        draw_square(x_offset, y_offset, VESA_WIDTH - 2*x_offset, VESA_HEIGHT - 2*y_offset, VESA_RED);
-        renderPlayer(x, y, scale, tailX, tailY, tailLength);
+        render_fill(renderer, 0, 0, VESA_WIDTH, VESA_HEIGHT, VESA_BLACK+0xFF000000);
+        render_square(renderer, x_offset, y_offset, VESA_WIDTH - 2*x_offset, VESA_HEIGHT - 2*y_offset, VESA_RED+0xFF000000);
+        renderPlayer(renderer, x, y, scale, tailX, tailY, tailLength);
         if (started)
 		{
-			renderFood( food.x, food.y, scale);
+			renderFood(renderer, food.x, food.y, scale);
 		}
-		renderScore(tailLength, scale, x_offset, y_offset);
-        int tmr = 0;
-        while (tmr<50000000)
-        {
-            tmr++;
-        }
+		renderScore(renderer, tailLength, scale, x_offset, y_offset);
+        draw_rendered(renderer);        
+ 
 	}
 
-	return ;
+	kfree(renderer);
+	return;
 }
 
